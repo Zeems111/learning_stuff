@@ -1,0 +1,14 @@
+c = '\N{euro sign}'
+bit_c = c.encode('utf8')
+print(c)
+print(bin(ord(c)))
+
+sm = '\U00013079'
+print(sm)
+#with open('d.txt', 'r', encoding='ascii'm errors='surrogateescape') as f:
+
+
+print(int(0x042B))
+c = 0x0061
+print(chr(c))
+print(u'\\u0203'.encode('utf8').decode('unicode-escape'))
