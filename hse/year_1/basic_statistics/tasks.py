@@ -1,226 +1,93 @@
-import pandas as pd
 import numpy as np
-import datetime
-import json
-'''
-df = pd.DataFrame([[1,2,3],
-                  [1,5,6],
-                  [7,8,9]],
-                  index=['a','b','c'],
-                  columns = ['x','y','z'])
-print(df)
+from scipy.stats import ttest_1samp, ttest_ind, ttest_rel
+from scipy.stats import t, binom, norm
+import scipy.stats
 
-df['Average'] = df.iloc[:, :].mean(axis=1)
-print(df)
+s1 = (47, 48, 51, 52, 52, 50, 47, 46, 52, 48, 49, 55, 52, 49, 52, 47, 50, 53, 48, 52)
+s2 = (60, 58, 61, 61, 54, 57, 59, 63, 60, 61)
+t_stat, pvalue = ttest_ind(s1, s2, equal_var=False, alternative='two-sided')
+#print(t_stat, pvalue)
 
-df=df.sort_values(['x', 'y'], ascending=[True, False])
-print(df)
+x = np.mean(s1)
+y = np.mean(s2)
+#print(x, y)
+'''var_x = np.var(s1, ddof = 1) / len(s1)
+var_y = np.var(s2, ddof = 1) / len(s2)
+std_t = np.sqrt(var_x + var_y)
+t_stat = (x - y)/ std_t
+print(t_stat)'''
 
-def iqr(x:pd.Series):
-    return x.quantile(0.75) - x.quantile(0.25)
-df.groupby(['col1','col2'])['property'].agg(iqr).unstack()
+binom_d = binom(n=10, p=3/4)
+#print(binom_d.ppf(0.95))
+p = 0
+for i in [0, 1, 9, 10]:
+    p += binom_d.pmf(i)
+    #print(f'P(X == {i})', binom_d.pmf(i))
+    #print(f'P(X <= {i})', binom_d.cdf(i))
+    #print(f'P(X < {i})', binom_d.cdf(i-1))
+    #print(f'P(X >= {i})', 1 - binom_d.cdf(i-1))
+#print(p)
+q = 0
+for i in range(2,9):
+    q += binom_d.pmf(i)
+    #print(f'P(X == {i})', binom_d.pmf(i))
+    #print(f'P(X <= {i})', binom_d.cdf(i))
+    #print(f'P(X < {i})', binom_d.cdf(i-1))
+    #print(f'P(X >= {i})', 1 - binom_d.cdf(i-1))
+#print('P(not reject H0) is:', round(q, 8))
+#print('Power of the test is:', round(1-q, 6))
 
-df.pivot(index='student', columns='course', values='grade')
-df.pivot_table(index='student', columns='course', values='grade', aggfunc='min')
+#print(ttest_1samp([8,12,10,12,9], 12, alternative='greater'))
 
-df.melt(id_vars='student', var_name='course', value_name='grade')
+norm_d = norm(0, np.sqrt(0.05))
+x_crit = norm_d.ppf(0.95)
+#print('X_crit:', x_crit)
 
-df.merge(table, left_on='col1', right_on='id', how='inner')
-df.merge(table, left_on='col1', right_on='id', how='left/right/outer')
-'''
-def mult_table(n):
-    nums = [[i*j for j in range(1, n+1)] for i in range(1, n+1)]
-    return pd.DataFrame(nums, index=range(1, n+1), columns=range(1,n+1))
+norm_d = norm(1, np.sqrt(0.05))
+p = norm_d.cdf(x_crit)
+#print('P(X <= x_crit):', p)
+#print('Power of the test:', 1-p)
 
-def get_rows_after_5(df, n):
-    return df[4:4+n]
-
-def between(df, n, m):
-    return df.loc[n:m]
-
-def get_grade(df:pd.DataFrame, lastname, firstname, course):
-    return int(df[(df['Last Name'] == lastname) &
-              (df['First Name'] == firstname)][course].iloc[0])
-
-def contains_null(df:pd.DataFrame):
-    return np.any(df.isnull())
-
-def gpa_top(df:pd.DataFrame):
-    df['GPA'] = df.iloc[:,2:].mean(axis=1)
-    df.sort_values('GPA', ascending=False, inplace=True)
-    return df[df['GPA']>=4]
-
-def weight_grades(grades:pd.DataFrame, weights):
-    return grades.dot(weights)
-
-def standartize(df:pd.DataFrame):
-    mu = df.mean(axis=0)
-    std = df.std(axis=0)
-    return (df-mu)/std
-
-def sort_gradebook(gradebook):
-    n = len(gradebook[0]) - 3
-    cols=['first_name', 'last_name',]
-    cols.extend([f'grade_{i+1}' for i in range(n)])
-    cols.append('final_grade')
-
-    sort_order = ['final_grade']
-    sort_order.extend([f'grade_{i+1}' for i in range(n)])
-    sort_order.extend(['last_name', 'first_name',])
-
-    order = [False]*(n+3)
-    order[-2] = True
-    grades = pd.DataFrame(gradebook, columns=cols)
-    grades.sort_values(sort_order, ascending=order,inplace=True)
-
-    return(grades)
-
-def mean_grade_dict(lst):
-    df = pd.DataFrame(lst)
-    df = df.mean(axis=0)
-    return df.to_dict()
-
-def mean_by_group(grades, groups):
-    df = pd.DataFrame([grades, groups], index=['grade', 'group']).T
-    means = df.groupby('group').mean().to_dict()['grade']
-    return means
-
-def check_table(df:pd.DataFrame):
-    df['Money_spent']=df['Quantity'] * df['Price']
-    spent = df.groupby('Customer')['Money_spent'].sum()
-    revenue = df.groupby('Item')['Money_spent'].sum()
-    return spent.to_dict(), revenue.to_dict()
-
-def make_panel(df:pd.DataFrame):
-    df.reset_index(drop=False, inplace=True)
-    df = df.rename(columns={'index':'firm'})
-    df = df.melt(id_vars='firm', var_name='year', value_name='value')
-    df = df.reindex(columns=['year', 'firm', 'value'])
-    df.sort_values(['firm','year'],inplace=True)
-    df.reset_index(drop=True, inplace=True)
-    return df
-
-def merge_gradebooks(gradebooks):
-    df = pd.DataFrame()
-    for (group, x) in gradebooks:
-        some = pd.concat([x , pd.DataFrame([group]*len(x), index=x.index)], axis=1)
-        df = pd.concat([df, some], axis=0)
-    df.rename(columns={0:'group'}, inplace=True)
-    return df
-
-def check_table_merge(df, prices):
-    df = df.merge(prices, how='left', left_on='Item', right_on='item_name')
-    df['Money_spent']=df['Quantity'] * df['price']
-    spent = df.groupby('Customer')['Money_spent'].sum()
-    revenue = df.groupby('Item')['Money_spent'].sum()
-    return spent.to_dict(), revenue.to_dict()
-
-def winner_votes(results):
-    results['Max'] = results.iloc[:,2:].idxmax(axis=1)
-    results = results.groupby('Max')['electors'].sum()
-    results.sort_index(inplace=True)
-    return (results.idxmax(), results.max())
-
-def merge_sectors(df_emp:pd.DataFrame, df_names:pd.DataFrame):
-    df_emp['code2']=df_emp['code3'] // 10
-    df_emp = df_emp.merge(df_names, on='code2', how='left')
-    df_emp.drop(columns='code2', inplace=True)
-    df_emp.rename(columns={'name':'group_name'}, inplace=True)
-    return df_emp
-
-def make_books(df_phone, df_address):
-    df_phone['Full Name'] = df_phone['First Name']+' '+ df_phone['Last Name']
-    book = pd.merge(left=df_phone, right=df_address, on=['Full Name', 'State'])
-    book.drop(columns=['Full Name'], inplace=True)    
-    book.dropna(axis=0, subset=['Phone','Address'], inplace=True)
-    print(book)
-    books = []
-    for state in book['State'].unique():
-        books.append(book[book['State']==state].reset_index(drop=True))
-    return books
-
-def totals(purchases, goods, discounts):
-    df = pd.merge(left=goods, right = purchases, left_on='good', right_on='item', how='outer')
-    df['total'] = df['quantity'] * df['price']
-    df['total'].fillna(0.0, inplace=True)
-    df['client'].fillna(df['client'][0], inplace=True)
-    df.drop(columns=['item','quantity', 'price'], inplace=True)
-    df = df.merge(discounts, on='client', how='left').fillna(0.0)
-    df['total'] *= (1-df['discount']/100)
-    df=df.pivot_table(values='total', index = 'client', columns='good', fill_value=0)
-    return df
-
-'''def final_grades(grades:pd.DataFrame, excuses:pd.DataFrame):
-    grades = grades.reset_index().rename(columns={'index':'student'})
-    grades = grades.melt(id_vars='student',var_name='date', value_name='mark').fillna(0)
-    grades.set_index(keys=['student', 'date'], inplace=True, drop=True)
-    excuses['reason'] =  excuses['reason'].str.contains('ill')
-    excuses.set_index(keys=['student', 'date'], inplace=True, drop=True)
-    grades = grades.merge(excuses, left_index=True, right_index=True, how='left')
-    grades['reason'].fillna(False)
-    #grades.loc[grades['reason']==True,'mark'] = pd.NA
-    #grades.drop(columns='reason', inplace=True)
-    #grades = grades.groupby('student')['mark'].mean()
-    #grades = pd.Series(grades.to_dict())
-    return grades'''
-
-def final_grades(grades:pd.DataFrame, excuses:pd.DataFrame):
-    excuses['reason'] = excuses['reason'].str.contains('ill')
-    excuses = excuses.pivot(index='student', columns='date', values='reason').fillna(False)    
-    grades.fillna(0.0, inplace=True)
-    grades[grades[excuses] == 0] = pd.NA
-    return grades.mean(axis=1)
-
-if __name__ == '__main__':
-    grades = pd.DataFrame([[5, np.nan, 7, np.nan],
-                        [2, np.nan, np.nan, 4]], index=['Hannah', 'Ryan'],
-                        columns=pd.date_range(start="2017-02-01", freq="W",
-                                                periods=4))
-    excuses = pd.DataFrame([['Hannah', datetime.datetime(2017, 2, 5),
-                            'was ill'],
-                            ['Hannah', datetime.datetime(2017, 2, 12),
-                            'illness'],
-                            ['Ryan', datetime.datetime(2017, 2, 19), 'family'],
-                            ['Hurray',datetime.datetime(2017, 2, 19),
-                            'sport']],
-                        columns=['student', 'date', 'reason'])
-    
-    print(final_grades(grades, excuses))
+sample0 = (6, 7, 7, 5, 7, 8, 8, 7, 7, 7)
+sample1 = (7, 6, 6, 5, 5, 6, 7, 5, 5, 8)
+print(np.mean(sample0), np.mean(sample1))
+print(np.var(sample0), np.var(sample1))
+print(ttest_ind(sample0, sample1))
+print(ttest_ind(sample0, sample1, equal_var=False))
 
 
+sample0 = (6, 7, 7, 5, 7, 8, 8, 7, 7, 7)
+sample1 = (7, 6, 6, 5, 5, 6, 7, 5, 5, 8)
+t_stat, pvalue = ttest_ind(sample0, sample1, equal_var=False, alternative='two-sided')
+#print(f'p-value is {pvalue}')
 
+norm_d = norm(1, np.sqrt(0.05))
 
+sample_size = 6
+pop_mean = 3
+pop_range = 4
+mean_is_in = 0
+for i in range(10000):
+    sample = np.random.uniform(pop_mean - pop_range,
+                            pop_mean + pop_range,
+                            size=sample_size)
 
+    std_err = np.std(sample, ddof=1)/np.sqrt(sample_size)
+    r = 1.96 * std_err
+    sample_mean = np.mean(sample)
+    conf_int = (sample_mean - r, sample_mean + r)
+    if conf_int[0] <= pop_mean <= conf_int[1]:
+        mean_is_in += 1
+#print(mean_is_in/10000)
 
+#print(scipy.stats.t.interval(0.95, df=sample_size-1))
 
+sample = (1,2,2,4,3,2,5)
+n = len(sample)
+sample_mean = np.mean(sample)
+std_err = np.std(sample, ddof=1)/np.sqrt(n)
+_, coef = scipy.stats.norm.interval(0.99)
+print(sample_mean, coef, std_err, sample_mean + coef * std_err)
 
-
-    '''purch = pd.DataFrame([['Alice', 'sweeties', 4],
-                          ['Bob', 'chocolate', 5],
-                          ['Alice', 'chocolate', 3],
-                          ['Claudia', 'juice', 2],],
-                         columns=['client', 'item', 'quantity'])
-    goods = pd.DataFrame([['sweeties', 15],
-                          ['chocolate', 7],
-                          ['juice', 8],
-                          ['lemons', 3],],
-                         columns=['good','price'])
-    discounts = pd.DataFrame([['Alice', 10],
-                          ['Bob', 5],
-                          ['Patritia', 15],],
-                         columns=['client','discount'])
-    pd.testing.assert_frame_equal(
-    totals(purch, goods, discounts).sort_index(axis=0).sort_index(axis=1),
-    pd.DataFrame({'chocolate': {'Alice': 18.9, 'Bob': 33.25, 'Claudia': 0.0},
- 'juice': {'Alice': 0.0, 'Bob': 0.0, 'Claudia': 16.0},
- 'lemons': {'Alice': 0.0, 'Bob': 0.0, 'Claudia': 0.0},
- 'sweeties': {'Alice': 54.0, 'Bob': 0.0, 'Claudia': 0.0}}).sort_index(axis=0).sort_index(axis=1),
-    check_names=False)
-
-    df = totals(purch, goods, discounts).sort_index(axis=0).sort_index(axis=1)
-    print(df)
-    df['juice'] = df['juice'].astype(float)
-    for row in df.index:
-        for col in df.columns:
-            print(type(df.loc[row, col]), end=' ')
-        print()'''
+_, coef = scipy.stats.t.interval(0.99, df = n - 1)
+print(sample_mean, coef, std_err, sample_mean + coef * std_err)
