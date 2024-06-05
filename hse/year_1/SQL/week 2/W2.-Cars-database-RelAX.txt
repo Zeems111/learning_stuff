@@ -1,0 +1,50 @@
+group: carRentals
+
+
+
+Car = {
+    cid:number, make:string, year:number, mileage:number, clsid:string
+    1, nissan, 2017, 85000, B
+    2, peugeot, 2017, 79000, A
+    3, peugeot, 2017, 56000, B
+    4, renault, 2018, 28000, D
+    5, renault, 2019, 5500, A
+    6, peugeot, 2019, 2000, D
+    7, nissan, 2019, 1500, C
+}
+
+
+
+Driver = {
+    did:number, name:string, gender:string
+    1, Jared, m
+    2, Mary, f
+    3, Linda, f
+    4, Carol, f
+    5, Fred, m
+}
+
+
+
+Res = {
+    bid:number, start:date, finish:date, days:number, pickAt:string, cid:number, did:number
+    1, 2018-01-01, 2018-01-12, 11, airport, 1, 1
+    2, 2018-01-01, 2018-01-07, 6, 'city center', 2, 3
+    3, 2018-01-07, 2018-01-20, 13, airport, 2, 2
+    4, 2018-01-08, 2018-01-18, 10, airport, 3, 1
+    5, 2018-01-08, 2018-01-17, 9, airport, 4, 5
+    6, 2018-01-10, 2018-01-26, 16, 'city center', 7, 4
+    7, 2018-01-19, 2018-02-02, 14, airport, 4, 5
+    8, 2018-02-15, 2018-02-19, 4, airport, 5, 3
+    9, 2018-02-16, 2018-02-26, 8, airport, 6, 2
+}
+
+
+
+Class = {
+    clsid:string, capacity:number, bags:number, transmission:string
+    A, 2, 1, m
+    B, 2, 1, a
+    C, 5, 3, m
+    D, 5, 3, a
+}

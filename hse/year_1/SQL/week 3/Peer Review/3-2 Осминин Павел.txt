@@ -1,0 +1,39 @@
+WITH
+--
+GLE AS (
+    SELECT
+        'GLE' AS indicator,
+        (SELECT MAX(lifeexpectancy)
+         FROM public.country
+         WHERE governmentform = 'Federal republic' AND lifeexpectancy IS NOT NULL) AS "Federal republic",
+        (SELECT MAX(lifeexpectancy)
+         FROM public.country
+         WHERE governmentform = 'Republic' AND lifeexpectancy IS NOT NULL) AS "Republic",
+        (SELECT MAX(lifeexpectancy)
+         FROM public.country
+         WHERE governmentform NOT IN ('Federal republic', 'Republic') AND lifeexpectancy IS NOT NULL) AS "Others"
+    FROM
+        public.country
+    LIMIT 1
+),
+--
+LLE AS (
+    SELECT
+        'LLE' AS indicator,
+        (SELECT MIN(lifeexpectancy)
+         FROM public.country
+         WHERE governmentform = 'Federal republic' AND lifeexpectancy IS NOT NULL) AS "Federal republic",
+        (SELECT MIN(lifeexpectancy)
+         FROM public.country
+         WHERE governmentform = 'Republic' AND lifeexpectancy IS NOT NULL) AS "Republic",
+        (SELECT MIN(lifeexpectancy)
+         FROM public.country
+         WHERE governmentform NOT IN ('Federal republic', 'Republic') AND lifeexpectancy IS NOT NULL) AS "Others"
+    FROM
+        public.country
+    LIMIT 1
+)
+--
+SELECT * FROM GLE
+UNION ALL
+SELECT * FROM LLE;

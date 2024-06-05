@@ -1,0 +1,19 @@
+/*select records about guests, 
+who visited hotel more than once */
+guests_with_multiple_stays = pi a.gid 
+sigma a.sid <> b.sid and a.gid = b.gid
+(rho a (Stay) cross join rho b (Stay))
+
+/*all visits by guests, who stayed in the hotel more than once*/
+visits = guests_with_multiple_stays natural join Stay
+
+/*select records about guests, 
+who stayed for less nights during at least one of the visits,
+compared to previous ones*/
+less_nights_then_prev_stay = pi a.gid 
+sigma a.sid <> b.sid and a.gid = b.gid and a.start < b.start and a.nights > b.nights
+(rho a (Stay) cross join rho b (Stay)) natural join Stay
+
+/* Filter out records of visits that don't fit tasks criteria
+and get guests' info*/
+pi gid, gName, email (Guest natural join pi gid (visits - less_nights_then_prev_stay))

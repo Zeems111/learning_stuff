@@ -1,0 +1,37 @@
+CREATE DATABASE Bolonin_hw2_festival;
+
+CREATE TABLE zone (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  designation VARCHAR(20) CHECK (designation IN ('food', 'concert', 'info')), 
+  opening_date DATE NOT NULL,
+  closing_date DATE NOT NULL
+);
+
+CREATE TABLE employee (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  surname VARCHAR(50) NOT NULL, 
+  date_of_birth DATE NOT NULL,
+  gender VARCHAR(10),
+  status VARCHAR(10) CHECK (status IN ('working', 'vacation', 'quit')),
+  salary NUMERIC(10,2),
+  experience_description TEXT
+);
+
+CREATE TABLE participant (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  surname VARCHAR(50) NOT NULL,
+  date_of_birth DATE NOT NULL,
+  gender VARCHAR(10),
+  preferred_zone INTEGER REFERENCES zone(id)
+);
+
+CREATE TABLE employeezones (
+  emp_id INTEGER REFERENCES employee(id),
+  zone_id INTEGER REFERENCES zone(id),
+  start_date DATE NOT NULL,
+  end_date DATE,
+  PRIMARY KEY (emp_id, zone_id)  
+);

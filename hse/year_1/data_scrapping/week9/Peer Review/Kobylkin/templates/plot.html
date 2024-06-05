@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plot</title>
+</head>
+<body>
+
+<div>
+    Roots of the equation are:
+    {% if not roots %}
+        no real roots
+    {% else %}
+        {% if roots|length == 1 %}
+            one real root
+        {% else %}
+            two real roots
+        {% endif %}
+        <ul>
+        {% for root in roots %}
+            <li>{{ root }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+<div>
+    <img src="data:iamge/png;base64, {{graph}}" alt="plot">
+</div>
+
+</body>
+</html>

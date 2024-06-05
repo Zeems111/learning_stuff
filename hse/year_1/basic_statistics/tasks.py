@@ -94,3 +94,4 @@ print(sample_mean, coef, std_err, sample_mean + coef * std_err)
 
 normis = scipy.stats.norm(0, 1)
 print(normis.cdf(1.96))
+
