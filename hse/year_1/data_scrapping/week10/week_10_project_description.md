@@ -75,7 +75,7 @@ You are required to submit a ZIP-archive with three files
 
 `imdb_week_10.ipynb` shoud contain the output for all function calls with the arguments below:
 * for `get_movies_by_actor_soup`:
-    * actor Dwayne Johnson https://www.imdb.com/name/nm0425005/
+    * actor Dwayne Johnson get_movies_by_actor_soup
     * actor Dwayne Johnson https://www.imdb.com/name/nm0425005/, num_of_movies_limit=100
     * actor Dwayne Johnson https://www.imdb.com/name/nm0425005/, num_of_movies_limit=5
     * actress Scarlett Johansson https://www.imdb.com/name/nm0424060/
